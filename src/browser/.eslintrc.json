@@ -1,0 +1,3 @@
+{
+  "extends": ["mixmax/browser", "mixmax/flow"]
+}

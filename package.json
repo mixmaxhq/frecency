@@ -1,0 +1,46 @@
+{
+  "name": "@mixmaxhq/frecency",
+  "version": "0.0.1",
+  "description": "Frecency sorting for search results.",
+  "browser": {
+    "index.js": "dist/browser/index.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "ci": "yarn lint && yarn build",
+    "lint": "eslint .",
+    "prebuild": "rm -rf dist/ && flow",
+    "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",
+    "watch": "WATCH=true yarn build",
+    "prepublish": "yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mixmaxhq/frecency.git"
+  },
+  "author": "Mixmax <hello@mixmax.com> (https://mixmax.com)",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/mixmaxhq/frecency/issues"
+  },
+  "homepage": "https://github.com/mixmaxhq/frecency#readme",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-external-helpers": "^6.18.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.19.1",
+    "eslint-config-mixmax": "^1.0.0",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "flow-bin": "^0.69.0",
+    "rollup": "^0.57.1",
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-flow": "^1.1.1",
+    "rollup-plugin-node-resolve": "^2.0.0"
+  }
+}
