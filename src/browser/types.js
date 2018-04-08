@@ -47,7 +47,8 @@ export type FrecencyData = {
 export type FrecencyOptions = {
   resourceType: string,
   timestampsLimit: number,
-  recentSelectionsLimit: number
+  recentSelectionsLimit: number,
+  idAttribute: number
 };
 
 export type SaveParams = {

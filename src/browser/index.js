@@ -9,15 +9,19 @@ class Frecency {
   _timestampsLimit: number;
   // Max number of IDs that should be stored in frecency to limit the object size.
   _recentSelectionsLimit: number;
+  // Attribute to use as the search result's id.
+  _idAttribute: string;
 
   _frecency: FrecencyData;
 
-  constructor({ resourceType, timestampsLimit, recentSelectionsLimit }: FrecencyOptions) {
+  constructor({ resourceType, timestampsLimit, recentSelectionsLimit,
+    idAttribute }: FrecencyOptions) {
     if (!resourceType) throw new Error('Resource type is required.');
 
     this._resourceType = resourceType;
     this._timestampsLimit = timestampsLimit || 10;
     this._recentSelectionsLimit = recentSelectionsLimit || 100;
+    this._idAttribute = idAttribute || '_id';
 
     this._frecency = this._getFrecencyData();
   }
@@ -159,8 +163,8 @@ class Frecency {
     });
   }
 
-  sort({ searchQuery, results, idAttribute }: SortParams) {
-    this._calculateFrecencyScores(results, searchQuery, idAttribute);
+  sort({ searchQuery, results }: SortParams) {
+    this._calculateFrecencyScores(results, searchQuery);
 
     // For recent selections, sort by frecency. Otherwise, fall back to
     // server-side sorting.
@@ -173,11 +177,11 @@ class Frecency {
     ];
   }
 
-  _calculateFrecencyScores(results: Object[], searchQuery: string, idAttribute: string): void {
+  _calculateFrecencyScores(results: Object[], searchQuery: string): void {
     const now = Date.now();
 
     results.forEach((result) => {
-      const resultId = result[idAttribute];
+      const resultId = result[this._idAttribute];
 
       // Try calculating frecency score by exact query match.
       const frecencyForQuery = this._frecency.queries[searchQuery];
