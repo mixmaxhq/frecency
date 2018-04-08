@@ -11,20 +11,12 @@ const presets = [[
   }
 ]];
 
-const external = [
-  'underscore'
-];
-
 export default {
   input: 'src/browser/index.js',
-  external,
   plugins: [
     flow(),
     nodeResolve({
       browser: true,
-      // Needed in addition to the `external` definition to suppress `require('underscore')`
-      // in `/common`: https://github.com/rollup/rollup-plugin-node-resolve/issues/72
-      skip: ['underscore']
     }),
     babel({
       presets,

@@ -50,7 +50,13 @@ export type FrecencyOptions = {
   recentSelectionsLimit: number
 };
 
-export type SaveOptions = {
+export type SaveParams = {
   searchQuery: string,
   selectedId: string
+};
+
+export type SortParams = {
+  searchQuery: string,
+  results: Object[],
+  idAttribute: string
 };

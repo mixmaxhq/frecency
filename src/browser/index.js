@@ -1,7 +1,6 @@
 // @flow
 
-import _ from 'underscore';
-import type {FrecencyData, FrecencyOptions, SaveOptions} from './types';
+import type {FrecencyData, FrecencyOptions, SaveParams, SortParams} from './types';
 
 class Frecency {
   // Used to create key that will be used to save frecency data in localStorage.
@@ -11,15 +10,19 @@ class Frecency {
   // Max number of IDs that should be stored in frecency to limit the object size.
   _recentSelectionsLimit: number;
 
+  _frecency: FrecencyData;
+
   constructor({ resourceType, timestampsLimit, recentSelectionsLimit }: FrecencyOptions) {
     if (!resourceType) throw new Error('Resource type is required.');
 
     this._resourceType = resourceType;
     this._timestampsLimit = timestampsLimit || 10;
     this._recentSelectionsLimit = recentSelectionsLimit || 100;
+
+    this._frecency = this._getFrecencyData();
   }
 
-  save({ searchQuery, selectedId }: SaveOptions): void {
+  save({ searchQuery, selectedId }: SaveParams): void {
     if (!searchQuery || !selectedId) return;
 
     const now = Date.now();
@@ -30,6 +33,7 @@ class Frecency {
 
     this._cleanUpOldSelections(frecency, selectedId);
     this._saveFrecencyData(frecency);
+    this._frecency = frecency;
   }
 
   _getFrecencyKey(): string {
@@ -77,10 +81,8 @@ class Frecency {
     previousSelection.selectedAt.push(now);
 
     // Limit the recent selections timestamps.
-    previousSelection.selectedAt = _.last(
-      previousSelection.selectedAt,
-      this._timestampsLimit
-    );
+    previousSelection.selectedAt = previousSelection.selectedAt
+      .slice(1, this._timestampsLimit + 1);
   }
 
   _updateFrecencyById(frecency: FrecencyData, searchQuery: string, selectedId: string,
@@ -104,10 +106,8 @@ class Frecency {
     previousSelection.selectedAt.push(now);
 
     // Limit the recent selections timestamps.
-    previousSelection.selectedAt = _.last(
-      previousSelection.selectedAt,
-      this._timestampsLimit
-    );
+    previousSelection.selectedAt = previousSelection.selectedAt
+      .slice(1, this._timestampsLimit + 1);
 
     // Remember which search queries this result was selected for so we can
     // remove this result from frecency later when cleaning up.
@@ -118,10 +118,10 @@ class Frecency {
     const recentSelections = frecency.recentSelections;
 
     // If frecency already contains the selected ID, shift it to the front.
-    if (_.contains(recentSelections, selectedId)) {
+    if (recentSelections.includes(selectedId)) {
       frecency.recentSelections = [
         selectedId,
-        ..._.without(recentSelections, selectedId)
+        ...recentSelections.filter((id) => id !== selectedId)
       ];
       return;
     }
@@ -141,98 +141,108 @@ class Frecency {
 
     frecency.recentSelections = [
       selectedId,
-      ..._.without(recentSelections, idToRemove)
+      ...recentSelections
     ];
 
-    const selectionById = frecency.selections[selectedId];
+    const selectionById = frecency.selections[idToRemove];
     if (!selectionById) return;
-    delete frecency.selections[selectedId];
+    delete frecency.selections[idToRemove];
 
     Object.keys(selectionById.queries).forEach((query) => {
-      frecency.queries[query] = _.reject(frecency.queries[query], {
-        id: selectedId
+      frecency.queries[query] = frecency.queries[query].filter((selection) => {
+        return selection.id !== idToRemove;
       });
 
-      if (_.isEmpty(frecency.queries[query])) {
+      if (frecency.queries[query].length === 0) {
         delete frecency.queries[query];
       }
     });
   }
 
-  // sort({
-  //   searchQuery,
-  //   resources
-  // }) {
-  //   _.each(resources, (resource) => resource.score = 0);
+  sort({ searchQuery, results, idAttribute }: SortParams) {
+    this._calculateFrecencyScores(results, searchQuery, idAttribute);
 
-  //   const frecency = JSON.parse(localStorage.getItem('frecency')) || {};
-  //   const frecencyForQuery = frecency[searchQuery];
+    // For recent selections, sort by frecency. Otherwise, fall back to
+    // server-side sorting.
+    const recentSelections = results.filter((result) => result._frecencyScore > 0);
+    const otherSelections = results.filter((result) => result._frecencyScore === 0);
 
-  //   if (frecencyForQuery) {
-  //     _.each(resources, (resource) => {
-  //       const selection = _.findWhere(frecencyForQuery, {
-  //         selectedId: resource._id
-  //       });
+    return [
+      ...recentSelections.sort((b, a) => b._frecencyScore - a._frecencyScore),
+      ...otherSelections
+    ];
+  }
 
-  //       if (!selection) return;
-  //       resource.score = calculateScore(selection.selectedAt);
-  //     });
-  //   }
+  _calculateFrecencyScores(results: Object[], searchQuery: string, idAttribute: string): void {
+    const now = Date.now();
 
-  //   // For recent selections, sort by frecency. Otherwise, fall back to
-  //   // server-side sorting.
-  //   const [ recentSelections, otherSelections ] = _.partition(resources, (resource) => {
-  //     return resource.score > 0;
-  //   });
+    results.forEach((result) => {
+      const resultId = result[idAttribute];
 
-  //   return [
-  //     ..._.sortBy(recentSelections, (resource) => -resource.score),
-  //     ...otherSelections
-  //   ];
-  // }
+      // Try calculating frecency score by exact query match.
+      const frecencyForQuery = this._frecency.queries[searchQuery];
+
+      if (frecencyForQuery) {
+        const selection = frecencyForQuery.find((selection) => {
+          return selection.id === resultId;
+        });
+
+        if (selection) {
+          result._frecencyScore = this._calculateScore(selection.selectedAt,
+            selection.timesSelected, now);
+          return;
+        }
+      }
+
+      // Try calculating frecency score by sub-query match.
+      const subQueries = Object.keys(this._frecency.queries).filter((query) => {
+        return query.startsWith(searchQuery);
+      });
+
+      for (let i = 0; i < subQueries.length; ++i) {
+        const subQuery = subQueries[i];
+        const selection = this._frecency.queries[subQuery].find((selection) => {
+          return selection.id === resultId;
+        });
+
+        if (selection) {
+          // Reduce the score because this is not an exact query match.
+          result._frecencyScore = 0.75 * this._calculateScore(selection.selectedAt,
+            selection.timesSelected, now);
+          return;
+        }
+      }
+
+      // Try calculating frecency score by ID.
+      const selection = this._frecency.selections[resultId];
+      if (selection) {
+        // Reduce the score because this is not an exact query match.
+        result._frecencyScore = 0.5 * this._calculateScore(selection.selectedAt,
+          selection.timesSelected, now);
+        return;
+      }
+
+      result._frecencyScore = 0;
+    });
+  }
+
+  _calculateScore(timestamps: number[], timesSelected: number, now: number): number {
+    if (timestamps.length === 0) return 0;
+
+    const hour = 1000 * 60 * 60;
+    const day = 24 * hour;
+
+    const totalScore = timestamps.reduce((score, timestamp) => {
+      if (timestamp >= now - 3 * hour) return score + 100;
+      if (timestamp >= now - day) return score + 80;
+      if (timestamp >= now - 3 * day) return score + 60;
+      if (timestamp >= now - 7 * day) return score + 30;
+      if (timestamp >= now - 14 * day) return score + 10;
+      return score;
+    }, 0);
+
+    return timesSelected * (totalScore / timestamps.length);
+  }
 }
-
-// function calculateScore(timestamps) {
-//   if (!timestamps) return 0;
-
-//   const now = Date.now();
-//   let totalScore = 0;
-
-//   _.each(timestamps, (timestamp) => {
-//     // Within 1 hour.
-//     const hour = 1000 * 60 * 60;
-//     if (timestamp >= now - hour) {
-//       return totalScore += 100;
-//     }
-
-//     // Within 3 hours.
-//     if (timestamp >= now - 3 * hour) {
-//       return totalScore += 80;
-//     }
-
-//     // Within 12 hours.
-//     if (timestamp >= now - 12 * hour) {
-//       return totalScore += 60;
-//     }
-
-//     // Within 1 day.
-//     const day = 24 * hour;
-//     if (timestamp >= now - day) {
-//       return totalScore += 40;
-//     }
-
-//     // Within 3 days.
-//     if (timestamp >= now - 3 * day) {
-//       return totalScore += 20;
-//     }
-
-//     // Within 1 week.
-//     if (timestamp >= now - 7 * day) {
-//       return totalScore += 10;
-//     }
-//   });
-
-//   return totalScore;
-// }
 
 export default Frecency;
