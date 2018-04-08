@@ -48,7 +48,7 @@ export type FrecencyOptions = {
   resourceType: string,
   timestampsLimit: number,
   recentSelectionsLimit: number,
-  idAttribute: number
+  idAttribute: string
 };
 
 export type SaveParams = {
@@ -58,6 +58,5 @@ export type SaveParams = {
 
 export type SortParams = {
   searchQuery: string,
-  results: Object[],
-  idAttribute: string
+  results: Object[]
 };

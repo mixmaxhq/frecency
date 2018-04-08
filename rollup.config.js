@@ -1,24 +1,21 @@
 import babel from 'rollup-plugin-babel';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
-const flow = require('rollup-plugin-flow');
 const pkg = require('./package.json');
 
-const presets = [[
-  'env',
-  {
-    modules: false
-  }
-]];
+const presets = [
+  ['env', { modules: false }],
+  'flow'
+];
 
 export default {
   input: 'src/browser/index.js',
   plugins: [
-    flow(),
     nodeResolve({
       browser: true,
     }),
     babel({
+      babelrc: false,
       presets,
       plugins: [
         'external-helpers'
