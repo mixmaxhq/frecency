@@ -29,7 +29,7 @@ export default {
   output: [
     {
       format: 'es',
-      file: pkg.browser['index.js']
+      file: pkg.browser['./index.js']
     }
   ]
 };
