@@ -45,9 +45,9 @@ export type FrecencyData = {
 
 export type FrecencyOptions = {
   key: string,
-  timestampsLimit: number,
-  recentSelectionsLimit: number,
-  idAttribute: string
+  timestampsLimit?: number,
+  recentSelectionsLimit?: number,
+  idAttribute?: string
 };
 
 export type SaveParams = {
