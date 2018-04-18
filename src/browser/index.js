@@ -1,24 +1,22 @@
 // @flow
-
-import type {FrecencyData, FrecencyOptions, SaveParams, SortParams} from './types';
+import type { FrecencyData, FrecencyOptions, SaveParams, SortParams } from './types';
 
 class Frecency {
   // Used to create key that will be used to save frecency data in localStorage.
-  _resourceType: string;
+  _key: string;
   // Max number of timestamps to save for recent selections of a result.
   _timestampsLimit: number;
   // Max number of IDs that should be stored in frecency to limit the object size.
   _recentSelectionsLimit: number;
   // Attribute to use as the search result's id.
-  _idAttribute: string;
+  _idAttribute: string | Function;
 
   _frecency: FrecencyData;
 
-  constructor({ resourceType, timestampsLimit, recentSelectionsLimit,
-    idAttribute }: FrecencyOptions) {
-    if (!resourceType) throw new Error('Resource type is required.');
+  constructor({ key, timestampsLimit, recentSelectionsLimit, idAttribute }: FrecencyOptions) {
+    if (!key) throw new Error('key is required.');
 
-    this._resourceType = resourceType;
+    this._key = key;
     this._timestampsLimit = timestampsLimit || 10;
     this._recentSelectionsLimit = recentSelectionsLimit || 100;
     this._idAttribute = idAttribute || '_id';
@@ -26,10 +24,18 @@ class Frecency {
     this._frecency = this._getFrecencyData();
   }
 
+  /**
+   * Updates frecency data after user selects a result.
+   * @param {Object} params
+   *   @prop {String} searchQuery - The search query the user entered.
+   *   @prop {String} selectedId - String representing the ID of the search result selected.
+   */
   save({ searchQuery, selectedId }: SaveParams): void {
     if (!searchQuery || !selectedId) return;
 
     const now = Date.now();
+
+    // Reload frecency here to pick up frecency updates from other tabs.
     const frecency = this._getFrecencyData();
 
     this._updateFrecencyByQuery(frecency, searchQuery, selectedId, now);
@@ -37,28 +43,49 @@ class Frecency {
 
     this._cleanUpOldSelections(frecency, selectedId);
     this._saveFrecencyData(frecency);
+
     this._frecency = frecency;
   }
 
+  // Returns the key that will be used to save frecency data in storage.
   _getFrecencyKey(): string {
-    return `frecency_${this._resourceType}`;
+    return `frecency_${this._key}`;
   }
 
+  // Reads frecency data from storage and returns the frecency object if
+  // the stored frecency data is valid.
   _getFrecencyData(): FrecencyData {
-    const defaultFrecency = {
+    const defaultFrecency: FrecencyData = {
       queries: {},
       selections: {},
       recentSelections: []
     };
 
     const savedData = localStorage.getItem(this._getFrecencyKey());
-    return savedData ? JSON.parse(savedData) : defaultFrecency;
+    if (!savedData) return defaultFrecency;
+
+    try {
+      return JSON.parse(savedData);
+    } catch (e) {
+      return defaultFrecency;
+    }
   }
 
+  /**
+   * Save frecency data back to storage.
+   * @param {FrecencyData} frecency
+   */
   _saveFrecencyData(frecency: FrecencyData): void {
     localStorage.setItem(this._getFrecencyKey(), JSON.stringify(frecency));
   }
 
+  /**
+   * Updates frecency by the search query the user entered when selecting a result.
+   * @param {FrecencyData} frecency - Frecency object to be modified in place.
+   * @param {String} searchQuery - Search query the user entered.
+   * @param {String} selectedId - ID of search result the user selected.
+   * @param {Number} now - Current time in milliseconds.
+   */
   _updateFrecencyByQuery(frecency: FrecencyData, searchQuery: string, selectedId: string,
     now: number): void {
 
@@ -84,11 +111,18 @@ class Frecency {
     previousSelection.timesSelected += 1;
     previousSelection.selectedAt.push(now);
 
-    // Limit the recent selections timestamps.
+    // Limit the selections timestamps.
     previousSelection.selectedAt = previousSelection.selectedAt
       .slice(1, this._timestampsLimit + 1);
   }
 
+  /**
+   * Updates frecency by the ID of the result selected.
+   * @param {FrecencyData} frecency - Frecency object to be modified in place.
+   * @param {String} searchQuery - Search query the user entered.
+   * @param {String} selectedId - ID of search result the user selected.
+   * @param {Number} now - Current time in milliseconds.
+   */
   _updateFrecencyById(frecency: FrecencyData, searchQuery: string, selectedId: string,
     now: number): void {
 
@@ -109,7 +143,7 @@ class Frecency {
     previousSelection.timesSelected += 1;
     previousSelection.selectedAt.push(now);
 
-    // Limit the recent selections timestamps.
+    // Limit the selections timestamps.
     previousSelection.selectedAt = previousSelection.selectedAt
       .slice(1, this._timestampsLimit + 1);
 
@@ -118,6 +152,12 @@ class Frecency {
     previousSelection.queries[searchQuery] = true;
   }
 
+  /**
+   * Remove the oldest IDs in the frecency data once the number of IDs
+   * saved in frecency has exceeded the limit.
+   * @param {FrecencyData} frecency - Frecency object to be modified in place.
+   * @param {String} selectedId - ID of search result the user selected.
+   */
   _cleanUpOldSelections(frecency: FrecencyData, selectedId: string): void {
     const recentSelections = frecency.recentSelections;
 
@@ -163,7 +203,14 @@ class Frecency {
     });
   }
 
-  sort({ searchQuery, results }: SortParams) {
+  /**
+   * Sorts a list of search results based on the saved frecency data.
+   * @param {Object} params
+   *   @prop {String} searchQuery - The search query the user entered.
+   *   @prop {Object[]} results - The list of search results to sort.
+   * @return {Object[]} A copy of the search results sorted by frecency.
+   */
+  sort({ searchQuery, results }: SortParams): Object[] {
     this._calculateFrecencyScores(results, searchQuery);
 
     // For recent selections, sort by frecency. Otherwise, fall back to
@@ -171,17 +218,41 @@ class Frecency {
     const recentSelections = results.filter((result) => result._frecencyScore > 0);
     const otherSelections = results.filter((result) => result._frecencyScore === 0);
 
-    return [
+    const sortedResults = [
       ...recentSelections.sort((b, a) => b._frecencyScore - a._frecencyScore),
       ...otherSelections
     ];
+
+    return sortedResults.map((result) => {
+      delete result._frecencyScore;
+      return result;
+    });
   }
 
+  /**
+   * Returns the ID of a search result that will be used for sorting.
+   * @param {Object} result - Search result to retrieve the ID from.
+   * @return {String} The ID of the search result.
+   */
+  _getId(result: Object): string {
+    if (typeof this._idAttribute === 'function') {
+      return this._idAttribute(result);
+    } else {
+      return result[this._idAttribute];
+    }
+  }
+
+  /**
+   * Calculates frecency scores for each search results and saves the score
+   * on the result object.
+   * @param {Object[]} results - List of search results to calculate scores for.
+   * @param {String} searchQuery - Search query the user entered.
+   */
   _calculateFrecencyScores(results: Object[], searchQuery: string): void {
     const now = Date.now();
 
     results.forEach((result) => {
-      const resultId = result[this._idAttribute];
+      const resultId = this._getId(result);
 
       // Try calculating frecency score by exact query match.
       const frecencyForQuery = this._frecency.queries[searchQuery];
@@ -200,18 +271,18 @@ class Frecency {
 
       // Try calculating frecency score by sub-query match.
       const subQueries = Object.keys(this._frecency.queries).filter((query) => {
-        return query.startsWith(searchQuery);
+        return query.toLowerCase().startsWith(searchQuery.toLowerCase());
       });
 
-      for (let i = 0; i < subQueries.length; ++i) {
-        const subQuery = subQueries[i];
+      // Use for-loop to allow early-return.
+      for (const subQuery of subQueries) {
         const selection = this._frecency.queries[subQuery].find((selection) => {
           return selection.id === resultId;
         });
 
         if (selection) {
           // Reduce the score because this is not an exact query match.
-          result._frecencyScore = 0.75 * this._calculateScore(selection.selectedAt,
+          result._frecencyScore = 0.7 * this._calculateScore(selection.selectedAt,
             selection.timesSelected, now);
           return;
         }
@@ -230,6 +301,14 @@ class Frecency {
     });
   }
 
+  /**
+   * Calculates a frecency score based on the timestamps a resources was selected,
+   * the total number of times selected, and the current time.
+   * @param {Number[]} timestamps - Timestamps of recent selections.
+   * @param {Number} timesSelected - Total number of times selected.
+   * @param {Number} now - Current time in milliseconds.
+   * @return {Number} The calculated frecency score.
+   */
   _calculateScore(timestamps: number[], timesSelected: number, now: number): number {
     if (timestamps.length === 0) return 0;
 

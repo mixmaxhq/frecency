@@ -16,7 +16,7 @@
     "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",
     "test": "jest",
     "watch": "WATCH=true yarn build",
-    "prepublish": "yarn build"
+    "prepublish": "yarn build && yarn test"
   },
   "repository": {
     "type": "git",

@@ -1,5 +1,4 @@
 // @flow
-
 export type FrecencyData = {
   // Stores information about which results the user selected based on
   // their search query and how frequently they selected these results.
@@ -45,7 +44,7 @@ export type FrecencyData = {
 };
 
 export type FrecencyOptions = {
-  resourceType: string,
+  key: string,
   timestampsLimit: number,
   recentSelectionsLimit: number,
   idAttribute: string
