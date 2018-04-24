@@ -23,12 +23,11 @@
     "url": "git+https://github.com/mixmaxhq/frecency.git"
   },
   "author": "Mixmax <hello@mixmax.com> (https://mixmax.com)",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/mixmaxhq/frecency/issues"
   },
   "homepage": "https://github.com/mixmaxhq/frecency#readme",
-  "dependencies": {},
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-jest": "^22.4.3",
