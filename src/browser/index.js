@@ -112,8 +112,10 @@ class Frecency {
     previousSelection.selectedAt.push(now);
 
     // Limit the selections timestamps.
-    previousSelection.selectedAt = previousSelection.selectedAt
-      .slice(1, this._timestampsLimit + 1);
+    if (previousSelection.selectedAt.length > this._timestampsLimit) {
+      previousSelection.selectedAt = previousSelection.selectedAt
+        .slice(1, this._timestampsLimit + 1);
+    }
   }
 
   /**
@@ -144,8 +146,10 @@ class Frecency {
     previousSelection.selectedAt.push(now);
 
     // Limit the selections timestamps.
-    previousSelection.selectedAt = previousSelection.selectedAt
-      .slice(1, this._timestampsLimit + 1);
+    if (previousSelection.selectedAt.length > this._timestampsLimit) {
+      previousSelection.selectedAt = previousSelection.selectedAt
+        .slice(1, this._timestampsLimit + 1);
+    }
 
     // Remember which search queries this result was selected for so we can
     // remove this result from frecency later when cleaning up.
@@ -211,6 +215,7 @@ class Frecency {
    * @return {Object[]} A copy of the search results sorted by frecency.
    */
   sort({ searchQuery, results }: SortParams): Object[] {
+    if (searchQuery === '') return results;
     this._calculateFrecencyScores(results, searchQuery);
 
     // For recent selections, sort by frecency. Otherwise, fall back to
@@ -219,7 +224,7 @@ class Frecency {
     const otherSelections = results.filter((result) => result._frecencyScore === 0);
 
     const sortedResults = [
-      ...recentSelections.sort((b, a) => b._frecencyScore - a._frecencyScore),
+      ...recentSelections.sort((a, b) => b._frecencyScore - a._frecencyScore),
       ...otherSelections
     ];
 

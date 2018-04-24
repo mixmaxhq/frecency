@@ -47,7 +47,7 @@ export type FrecencyOptions = {
   key: string,
   timestampsLimit?: number,
   recentSelectionsLimit?: number,
-  idAttribute?: string
+  idAttribute?: string | Function
 };
 
 export type SaveParams = {
