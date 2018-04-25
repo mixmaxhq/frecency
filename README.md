@@ -77,6 +77,17 @@ const frecency = new Frecency({
   key: 'people',
   idAttribute: (result) => result.id || result.email
 });
+
+// Depending on the result, save the appropriate ID in frecency.
+frecency.save({
+  searchQuery,
+  selectedId: selectedResult.id
+});
+
+frecency.save({
+  searchQuery,
+  selectedId: selectedResult.email
+});
 ```
 
 Frecency saves timestamps of your recent selections to calculate a score.
