@@ -135,8 +135,7 @@ class Frecency {
 
     // Limit the selections timestamps.
     if (previousSelection.selectedAt.length > this._timestampsLimit) {
-      previousSelection.selectedAt = previousSelection.selectedAt
-        .slice(1, this._timestampsLimit + 1);
+      previousSelection.selectedAt.shift();
     }
   }
 
@@ -169,8 +168,7 @@ class Frecency {
 
     // Limit the selections timestamps.
     if (previousSelection.selectedAt.length > this._timestampsLimit) {
-      previousSelection.selectedAt = previousSelection.selectedAt
-        .slice(1, this._timestampsLimit + 1);
+      previousSelection.selectedAt.shift();
     }
 
     // Remember which search queries this result was selected for so we can
