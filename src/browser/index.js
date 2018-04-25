@@ -38,7 +38,15 @@ class Frecency {
     // Reload frecency here to pick up frecency updates from other tabs.
     const frecency = this._getFrecencyData();
 
+    // Associate the selection with the search query used. This lets us sort this
+    // selection higher when the user enters the search query again. See:
+    // https://slack.engineering/a-faster-smarter-quick-switcher-77cbc193cb60#80de
     this._updateFrecencyByQuery(frecency, searchQuery, selectedId, now);
+
+    // Associate the selection with its ID. If the user doesn't enter the same search
+    // query as before, but this selection shows up in the list of results, we still
+    // want this selection to show up higher because it was recently selected. See:
+    // https://slack.engineering/a-faster-smarter-quick-switcher-77cbc193cb60#700c
     this._updateFrecencyById(frecency, searchQuery, selectedId, now);
 
     this._cleanUpOldIds(frecency, selectedId);
