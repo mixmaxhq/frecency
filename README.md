@@ -51,3 +51,41 @@ onSearch: (searchQuery) => {
   });
 }
 ```
+
+## Configuring Frecency
+Frecency will sort on `_id` by default. You can change this by setting an `idAttribute`:
+```js
+new Frecency({
+  key: 'people',
+  idAttribute: 'id'
+});
+
+new Frecency({
+  key: 'people',
+  idAttribute: 'email'
+});
+
+// Also accepts a function if your search results contains a
+// mix of different types.
+new Frecency({
+  key: 'people',
+  idAttribute: (result) => result.id || result.email
+});
+```
+
+Frecency saves timestamps of your recent selections to calculate a score.
+You can modify this with an option in the constructor.
+```js
+new Frecency({
+  key: 'people',
+  timeStampsLimit: 20   // Limit is 10 by default.
+});
+```
+
+To change the maximum number of different IDs stored in frecency:
+```js
+new Frecency({
+  key: 'people',
+  recentSelectionsLimit: 200   // Limit is 100 by default.
+});
+```
