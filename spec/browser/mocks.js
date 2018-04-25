@@ -1,3 +1,4 @@
+// @flow
 export class LocalStorageMock {
   data: { [string]: ?string };
 
@@ -12,5 +13,9 @@ export class LocalStorageMock {
 
   setItem(key: string, value: string) {
     this.data[key] = value;
+  }
+
+  removeItem(key: string) {
+    delete this.data[key];
   }
 }

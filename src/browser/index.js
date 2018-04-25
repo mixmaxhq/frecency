@@ -11,6 +11,7 @@ class Frecency {
   // Attribute to use as the search result's id.
   _idAttribute: string | Function;
 
+  _localStorageEnabled: boolean;
   _frecency: FrecencyData;
 
   constructor({ key, timestampsLimit, recentSelectionsLimit, idAttribute }: FrecencyOptions) {
@@ -20,6 +21,16 @@ class Frecency {
     this._timestampsLimit = timestampsLimit || 10;
     this._recentSelectionsLimit = recentSelectionsLimit || 100;
     this._idAttribute = idAttribute || '_id';
+
+    // If localStorage is checked, the methods in this class will be no-ops.
+    const mod = '____featurecheck____';
+    try {
+      localStorage.setItem(mod, mod);
+      localStorage.removeItem(mod);
+      this._localStorageEnabled = true;
+    } catch (e) {
+      this._localStorageEnabled = false;
+    }
 
     this._frecency = this._getFrecencyData();
   }
@@ -31,7 +42,7 @@ class Frecency {
    *   @prop {String} selectedId - String representing the ID of the search result selected.
    */
   save({ searchQuery, selectedId }: SaveParams): void {
-    if (!searchQuery || !selectedId) return;
+    if (!searchQuery || !selectedId || !this._localStorageEnabled) return;
 
     const now = Date.now();
 
@@ -69,6 +80,8 @@ class Frecency {
       recentSelections: []
     };
 
+    if (!this._localStorageEnabled) return defaultFrecency;
+
     const savedData = localStorage.getItem(this._getFrecencyKey());
     if (!savedData) return defaultFrecency;
 
@@ -84,6 +97,7 @@ class Frecency {
    * @param {FrecencyData} frecency
    */
   _saveFrecencyData(frecency: FrecencyData): void {
+    if (!this._localStorageEnabled) return;
     localStorage.setItem(this._getFrecencyKey(), JSON.stringify(frecency));
   }
 
@@ -223,7 +237,7 @@ class Frecency {
    * @return {Object[]} Search results sorted by frecency.
    */
   sort({ searchQuery, results }: SortParams): Object[] {
-    if (searchQuery === '') return results;
+    if (searchQuery === '' || !this._localStorageEnabled) return results;
     this._calculateFrecencyScores(results, searchQuery);
 
     // For recent selections, sort by frecency. Otherwise, fall back to
