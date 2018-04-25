@@ -91,6 +91,9 @@ frecency.save({
 ```
 
 Frecency saves timestamps of your recent selections to calculate a score.
+More timestamps result in more granular frecency scores, but frecency data takes up more
+space in localStorage.
+
 You can modify this with an option in the constructor.
 ```js
 new Frecency({
@@ -98,6 +101,9 @@ new Frecency({
   timeStampsLimit: 20   // Limit is 10 by default.
 });
 ```
+
+Frecency stores a maximum number of IDs in localStorage. More IDs means more results
+can be sorted with frecency, but frecency data takes up more space in localStorage.
 
 To change the maximum number of different IDs stored in frecency:
 ```js
