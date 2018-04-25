@@ -264,7 +264,7 @@ class Frecency {
 
       if (frecencyForQuery) {
         const selection = frecencyForQuery.find((selection) => {
-          return selection.id === resultId;
+          return selection.id.toLowerCase() === resultId.toLowerCase();
         });
 
         if (selection) {
