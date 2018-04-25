@@ -41,7 +41,7 @@ class Frecency {
     this._updateFrecencyByQuery(frecency, searchQuery, selectedId, now);
     this._updateFrecencyById(frecency, searchQuery, selectedId, now);
 
-    this._cleanUpOldSelections(frecency, selectedId);
+    this._cleanUpOldIds(frecency, selectedId);
     this._saveFrecencyData(frecency);
 
     this._frecency = frecency;
@@ -162,7 +162,7 @@ class Frecency {
    * @param {FrecencyData} frecency - Frecency object to be modified in place.
    * @param {String} selectedId - ID of search result the user selected.
    */
-  _cleanUpOldSelections(frecency: FrecencyData, selectedId: string): void {
+  _cleanUpOldIds(frecency: FrecencyData, selectedId: string): void {
     const recentSelections = frecency.recentSelections;
 
     // If frecency already contains the selected ID, shift it to the front.
