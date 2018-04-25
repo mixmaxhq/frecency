@@ -1,5 +1,4 @@
 import babel from 'rollup-plugin-babel';
-import nodeResolve from 'rollup-plugin-node-resolve';
 
 const pkg = require('./package.json');
 
@@ -11,9 +10,6 @@ const presets = [
 export default {
   input: 'src/browser/index.js',
   plugins: [
-    nodeResolve({
-      browser: true,
-    }),
     babel({
       babelrc: false,
       presets,

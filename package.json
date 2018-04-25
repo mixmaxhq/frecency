@@ -40,7 +40,6 @@
     "flow-bin": "^0.69.0",
     "jest": "^22.4.3",
     "rollup": "^0.57.1",
-    "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-node-resolve": "^2.0.0"
+    "rollup-plugin-babel": "^2.6.1"
   }
 }
