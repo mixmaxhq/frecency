@@ -55,19 +55,25 @@ onSearch: (searchQuery) => {
 ## Configuring Frecency
 Frecency will sort on `_id` by default. You can change this by setting an `idAttribute`:
 ```js
-new Frecency({
+const frecency = new Frecency({
   key: 'people',
   idAttribute: 'id'
 });
 
-new Frecency({
+const frecency = new Frecency({
   key: 'people',
   idAttribute: 'email'
 });
 
+// Then when saving frecency, make sure to save the correct attribute as the selectedId.
+frecency.save({
+  searchQuery,
+  selectedId: selectedResult.email
+});
+
 // Also accepts a function if your search results contains a
 // mix of different types.
-new Frecency({
+const frecency = new Frecency({
   key: 'people',
   idAttribute: (result) => result.id || result.email
 });
