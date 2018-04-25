@@ -212,7 +212,7 @@ class Frecency {
    * @param {Object} params
    *   @prop {String} searchQuery - The search query the user entered.
    *   @prop {Object[]} results - The list of search results to sort.
-   * @return {Object[]} A copy of the search results sorted by frecency.
+   * @return {Object[]} Search results sorted by frecency.
    */
   sort({ searchQuery, results }: SortParams): Object[] {
     if (searchQuery === '') return results;
