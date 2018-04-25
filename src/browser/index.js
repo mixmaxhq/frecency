@@ -1,5 +1,6 @@
 // @flow
 import type { FrecencyData, FrecencyOptions, SaveParams, SortParams } from './types';
+import { isSubQuery, localStorageEnabled } from './utils';
 
 class Frecency {
   // Used to create key that will be used to save frecency data in localStorage.
@@ -22,16 +23,8 @@ class Frecency {
     this._recentSelectionsLimit = recentSelectionsLimit || 100;
     this._idAttribute = idAttribute || '_id';
 
-    // If localStorage is checked, the methods in this class will be no-ops.
-    const mod = '____featurecheck____';
-    try {
-      localStorage.setItem(mod, mod);
-      localStorage.removeItem(mod);
-      this._localStorageEnabled = true;
-    } catch (e) {
-      this._localStorageEnabled = false;
-    }
-
+    // If localStorage is disabled, the methods in this class will be no-ops.
+    this._localStorageEnabled = localStorageEnabled();
     this._frecency = this._getFrecencyData();
   }
 
@@ -296,7 +289,7 @@ class Frecency {
 
       // Try calculating frecency score by sub-query match.
       const subQueries = Object.keys(this._frecency.queries).filter((query) => {
-        return query.toLowerCase().startsWith(searchQuery.toLowerCase());
+        return isSubQuery(searchQuery, query);
       });
 
       // Use for-loop to allow early-return.
