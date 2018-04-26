@@ -1,6 +1,6 @@
 {
   "name": "frecency",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Frecency sorting for search results.",
   "browser": {
     "./index.js": "dist/browser/index.js"
