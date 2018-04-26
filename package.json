@@ -1,6 +1,6 @@
 {
   "name": "@mixmaxhq/frecency",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Frecency sorting for search results.",
   "browser": {
     "./index.js": "dist/browser/index.js"
