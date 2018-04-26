@@ -52,7 +52,7 @@ describe('frecency', () => {
       }]);
     });
 
-    it('should not sort if search query is empty.', () => {
+    it('should sort if search query is empty.', () => {
       const frecency = new Frecency({ key: 'templates' });
       const now = 1524085045510;
 
@@ -76,11 +76,11 @@ describe('frecency', () => {
       });
 
       expect(results).toEqual([{
+        _id: 'brad neuberg'
+      }, {
         _id: 'brad vogel'
       }, {
         _id: 'simon xiong'
-      }, {
-        _id: 'brad neuberg'
       }]);
     });
 
