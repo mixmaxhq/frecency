@@ -1,5 +1,5 @@
 {
-  "name": "@mixmaxhq/frecency",
+  "name": "frecency",
   "version": "1.0.2",
   "description": "Frecency sorting for search results.",
   "browser": {
