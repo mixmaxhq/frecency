@@ -1,0 +1,30 @@
+# Use Trusty for a C++11 compiler, for our native dependencies:
+# https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Node.js-v4-(or-io.js-v3)-compiler-requirements
+# But it's also the future of Travis anyway.
+dist: trusty
+# Containers for faster startup, also we don’t need sudo.
+sudo: false
+
+language: node_js
+node_js:
+  - 8.9.3
+
+cache: yarn
+
+env:
+  global:
+    # Because Travis sometimes fails us.
+    - PATH="$HOME/.yarn/bin:$PATH"
+
+before_install:
+  # Because Travis sometimes fails us:
+  - (hash yarn 2>/dev/null && test "$(yarn --version)" == "$YARN_VERSION") || curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version "$YARN_VERSION"
+
+# Don’t build pushes to branches other than our published branches. (This doesn’t affect PR
+# builds, which are separate from branch builds in Travis. If we didn’t have this config,
+# Travis would run both types of builds for PRs, consuming our concurrent builds. More info.)
+branches:
+  only:
+    - master
+
+script: yarn run ci

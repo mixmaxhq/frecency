@@ -1,0 +1,9 @@
+{
+  "extends": ["mixmax/browser", "mixmax/flow"],
+  "env": {
+    "jest": true
+  },
+  "globals": {
+    "global": true
+  }
+}
