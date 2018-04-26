@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.0.4 Improve readme and install instructions.
+
 * 1.0.3 Add license.
 
 * 1.0.2 Fix unit tests.
