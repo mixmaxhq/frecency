@@ -51,11 +51,11 @@ export type FrecencyOptions = {
 };
 
 export type SaveParams = {
-  searchQuery: string,
+  searchQuery: ?string,
   selectedId: string
 };
 
 export type SortParams = {
-  searchQuery: string,
+  searchQuery: ?string,
   results: Object[]
 };
