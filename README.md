@@ -4,21 +4,21 @@ Plugin to add frecency to search results. Original blog post on Frecency by Slac
 
 ## Using The Module
 
-1) Install the npm module:
+Install the npm module:
 ```sh
-npm install @mixmaxhq/frecency
+npm install frecency
 ```
 
-2) Import Frecency into your code and create a Frecency instance.
+Import Frecency into your code and create an instance of Frecency.
 ```js
-import Frecency from '@mixmaxhq/frecency';
+import Frecency from 'frecency';
 
 export const peopleFrecency = new Frecency({
   key: 'people'   // Frecency data will be saved in localStorage with the key: 'frecency_people'.
 });
 ```
 
-3) When you select a search result in your code, update frecency:
+When you select a search result in your code, update frecency:
 ```js
 onSelect: (searchQuery, selectedResult) => {
   ...
@@ -30,34 +30,40 @@ onSelect: (searchQuery, selectedResult) => {
 }
 ```
 
-4) Before you display search results to your users, sort the result using frecency:
+Before you display search results to your users, sort the results using frecency:
 ```js
 onSearch: (searchQuery) => {
   ...
+  // Search results received from a search API.
+  const searchResults = [{
+    _id: '57b409d4feea972a68ba1101',
+    name: 'Brad Vogel',
+    email: 'brad@mixmax.com'
+  }, {
+    _id: '57a09ceb7abdf9cb2c35818c',
+    name: 'Brad Neuberg',
+    email: 'neuberg@gmail.com'
+  }, {
+    ...
+  }];
+
   return peopleFrecency.sort({
     searchQuery,
-    results: [{
-      _id: '57b409d4feea972a68ba1101',
-      name: 'Brad Vogel',
-      email: 'brad@mixmax.com'
-    }, {
-      _id: '57a09ceb7abdf9cb2c35818c',
-      name: 'Brad Neuberg',
-      email: 'neuberg@gmail.com'
-    }, {
-      ...
-    }]
+    results: searchResults
   });
 }
 ```
 
 ## Configuring Frecency
-Frecency will sort on `_id` by default. You can change this by setting an `idAttribute`:
+Frecency will sort on the `_id` attribute by default. You can change this by setting an
+`idAttribute` in the constructor:
 ```js
 const frecency = new Frecency({
   key: 'people',
   idAttribute: 'id'
 });
+
+// OR
 
 const frecency = new Frecency({
   key: 'people',
@@ -70,7 +76,7 @@ frecency.save({
   selectedId: selectedResult.email
 });
 
-// Also accepts a function if your search results contains a
+// `idAttribute` also accepts a function if your search results contain a
 // mix of different types.
 const frecency = new Frecency({
   key: 'people',
@@ -83,17 +89,19 @@ frecency.save({
   selectedId: selectedResult.id
 });
 
+// OR
+
 frecency.save({
   searchQuery,
   selectedId: selectedResult.email
 });
 ```
 
-Frecency saves timestamps of your recent selections to calculate a score.
-More timestamps result in more granular frecency scores, but frecency data takes up more
+Frecency saves timestamps of your recent selections to calculate a score and rank you results.
+More timestamps means more granular frecency scores, but frecency data will take up more
 space in localStorage.
 
-You can modify this with an option in the constructor.
+You can modify the number of timestamps saved with an option in the constructor.
 ```js
 new Frecency({
   key: 'people',
