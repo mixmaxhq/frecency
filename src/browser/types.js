@@ -51,7 +51,7 @@ export type FrecencyOptions = {
 };
 
 export type SaveParams = {
-  searchQuery: string,
+  searchQuery: ?string,
   selectedId: string
 };
 

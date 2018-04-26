@@ -35,7 +35,7 @@ class Frecency {
    *   @prop {String} selectedId - String representing the ID of the search result selected.
    */
   save({ searchQuery, selectedId }: SaveParams): void {
-    if (!searchQuery || !selectedId || !this._localStorageEnabled) return;
+    if (!selectedId || !this._localStorageEnabled) return;
 
     const now = Date.now();
 
@@ -101,8 +101,9 @@ class Frecency {
    * @param {String} selectedId - ID of search result the user selected.
    * @param {Number} now - Current time in milliseconds.
    */
-  _updateFrecencyByQuery(frecency: FrecencyData, searchQuery: string, selectedId: string,
+  _updateFrecencyByQuery(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
     now: number): void {
+    if (!searchQuery) return;
 
     const queries = frecency.queries;
     if (!queries[searchQuery]) queries[searchQuery] = [];
@@ -139,7 +140,7 @@ class Frecency {
    * @param {String} selectedId - ID of search result the user selected.
    * @param {Number} now - Current time in milliseconds.
    */
-  _updateFrecencyById(frecency: FrecencyData, searchQuery: string, selectedId: string,
+  _updateFrecencyById(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
     now: number): void {
 
     const selections = frecency.selections;
@@ -150,8 +151,10 @@ class Frecency {
       selections[selectedId] = {
         timesSelected: 1,
         selectedAt: [now],
-        queries: { [searchQuery]: true }
+        queries: {}
       };
+
+      if (searchQuery) selections[selectedId].queries[searchQuery] = true;
       return;
     }
 
@@ -166,7 +169,7 @@ class Frecency {
 
     // Remember which search queries this result was selected for so we can
     // remove this result from frecency later when cleaning up.
-    previousSelection.queries[searchQuery] = true;
+    if (searchQuery) previousSelection.queries[searchQuery] = true;
   }
 
   /**
