@@ -1,13 +1,12 @@
 # Frecency
 
-Plugin to add frecency to search results.
-Original blog post on Frecency by Slack: https://slack.engineering/a-faster-smarter-quick-switcher-77cbc193cb60
+Plugin to add frecency to search results. Original blog post on Frecency by Slack:<br> https://slack.engineering/a-faster-smarter-quick-switcher-77cbc193cb60
 
 ## Using The Module
 
 1) Install the npm module:
 ```sh
-yarn add @mixmaxhq/frecency
+npm install @mixmaxhq/frecency
 ```
 
 2) Import Frecency into your code and create a Frecency instance.
