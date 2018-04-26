@@ -56,6 +56,6 @@ export type SaveParams = {
 };
 
 export type SortParams = {
-  searchQuery: string,
+  searchQuery: ?string,
   results: Object[]
 };

@@ -228,7 +228,7 @@ class Frecency {
    * @return {Object[]} Search results sorted by frecency.
    */
   sort({ searchQuery, results }: SortParams): Object[] {
-    if (searchQuery === '' || !this._localStorageEnabled) return results;
+    if (!this._localStorageEnabled) return results;
     this._calculateFrecencyScores(results, searchQuery);
 
     // For recent selections, sort by frecency. Otherwise, fall back to
@@ -266,14 +266,14 @@ class Frecency {
    * @param {Object[]} results - List of search results to calculate scores for.
    * @param {String} searchQuery - Search query the user entered.
    */
-  _calculateFrecencyScores(results: Object[], searchQuery: string): void {
+  _calculateFrecencyScores(results: Object[], searchQuery: ?string): void {
     const now = Date.now();
 
     results.forEach((result) => {
       const resultId = this._getId(result);
 
       // Try calculating frecency score by exact query match.
-      const frecencyForQuery = this._frecency.queries[searchQuery];
+      const frecencyForQuery = searchQuery && this._frecency.queries[searchQuery];
 
       if (frecencyForQuery) {
         const selection = frecencyForQuery.find((selection) => {

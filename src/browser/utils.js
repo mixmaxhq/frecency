@@ -1,3 +1,4 @@
+// @flow
 /**
  * Performs a by-word prefix match to determine if a string is a sub query
  * of a given query. For example:
@@ -8,7 +9,9 @@
  * @param {String} query - The full query.
  * @return {Boolean} Whether str is a by-word prefix match of query.
  */
-export function isSubQuery(str: string, query: string): boolean {
+export function isSubQuery(str: ?string, query: string): boolean {
+  if (!str) return false;
+
   // Split the string into words and order reverse-alphabetically.
   const searchStrings = str.toLowerCase().split(' ').sort((a, b) => b > a ? 1 : -1);
   const queryStrings = query.toLowerCase().split(' ').sort((a, b) => b > a ? 1 : -1);
