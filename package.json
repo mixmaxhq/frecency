@@ -10,13 +10,13 @@
     "src"
   ],
   "scripts": {
-    "ci": "yarn lint && yarn build",
+    "ci": "npm run lint && npm run build",
     "lint": "eslint . && flow",
     "prebuild": "rm -rf dist/",
     "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",
-    "test": "yarn build && jest",
+    "test": "npm run build && jest",
     "watch": "WATCH=true yarn build",
-    "prepublish": "yarn lint && yarn build && yarn test"
+    "prepublish": "npm run lint && npm run build && npm test"
   },
   "repository": {
     "type": "git",
