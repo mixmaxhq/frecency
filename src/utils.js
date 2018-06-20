@@ -34,12 +34,12 @@ export function isSubQuery(str: ?string, query: string): boolean {
   return true;
 }
 
-// Returns true if localStorage is enabled. False otherwise.
-export function localStorageEnabled() {
+// Returns true if storageProvider respect is enabled. False otherwise.
+export function storageCapabilitiesAvailable(storageProvider: any) {
   const mod = '____featurecheck____';
   try {
-    localStorage.setItem(mod, mod);
-    localStorage.removeItem(mod);
+    storageProvider.setItem(mod, mod);
+    storageProvider.removeItem(mod);
     return true;
   } catch (e) {
     return false;

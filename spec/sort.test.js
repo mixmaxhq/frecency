@@ -1,5 +1,5 @@
 // @flow
-import Frecency from '../../src/browser';
+import Frecency from '../src';
 import { LocalStorageMock } from './mocks';
 
 const hour = 1000 * 60 * 60;

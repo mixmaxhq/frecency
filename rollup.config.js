@@ -8,7 +8,7 @@ const presets = [
 ];
 
 export default {
-  input: 'src/browser/index.js',
+  input: 'src/index.js',
   plugins: [
     babel({
       babelrc: false,
@@ -22,7 +22,7 @@ export default {
   output: [
     {
       format: 'es',
-      file: pkg.browser['./index.js']
+      file: 'dist/index.js'
     }
   ]
 };

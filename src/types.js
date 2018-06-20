@@ -43,11 +43,21 @@ export type FrecencyData = {
   recentSelections: string[];
 };
 
+export type StorageProvider = any & $ReadOnly<{
+  getItem: (key: string) => ?string,
+  setItem: (key: string, value: string) => void,
+  removeItem: (key: string) => void,
+  key: (n: number) => ?string,
+  clear: () => void,
+  length: number
+}>
+
 export type FrecencyOptions = {
   key: string,
   timestampsLimit?: number,
   recentSelectionsLimit?: number,
-  idAttribute?: string | Function
+  idAttribute?: string | Function,
+  storageProvider?: StorageProvider
 };
 
 export type SaveParams = {

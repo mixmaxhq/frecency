@@ -119,3 +119,12 @@ new Frecency({
   recentSelectionsLimit: 200   // Limit is 100 by default.
 });
 ```
+
+Frecency use browser localStorage as storage provider.
+You can pass your own storage provider that implements the API Web Storage interface.
+```js
+new Frecency({
+  key: 'people',
+  storageProvider: new MyStorageProvider()
+});
+```

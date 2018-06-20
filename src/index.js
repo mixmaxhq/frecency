@@ -1,6 +1,6 @@
 // @flow
-import type { FrecencyData, FrecencyOptions, SaveParams, SortParams } from './types';
-import { isSubQuery, localStorageEnabled } from './utils';
+import type { FrecencyData, FrecencyOptions, SaveParams, SortParams, StorageProvider } from './types';
+import { isSubQuery, storageCapabilitiesAvailable } from './utils';
 
 class Frecency {
   // Used to create key that will be used to save frecency data in localStorage.
@@ -13,18 +13,20 @@ class Frecency {
   _idAttribute: string | Function;
 
   _localStorageEnabled: boolean;
+  _storageProvider: StorageProvider;
   _frecency: FrecencyData;
 
-  constructor({ key, timestampsLimit, recentSelectionsLimit, idAttribute }: FrecencyOptions) {
+  constructor({ key, timestampsLimit, recentSelectionsLimit, idAttribute, storageProvider }: FrecencyOptions) {
     if (!key) throw new Error('key is required.');
 
     this._key = key;
     this._timestampsLimit = timestampsLimit || 10;
     this._recentSelectionsLimit = recentSelectionsLimit || 100;
     this._idAttribute = idAttribute || '_id';
+    this._storageProvider = storageProvider || localStorage;
 
     // If localStorage is disabled, the methods in this class will be no-ops.
-    this._localStorageEnabled = localStorageEnabled();
+    this._localStorageEnabled = storageCapabilitiesAvailable(this._storageProvider);
     this._frecency = this._getFrecencyData();
   }
 
@@ -75,7 +77,7 @@ class Frecency {
 
     if (!this._localStorageEnabled) return defaultFrecency;
 
-    const savedData = localStorage.getItem(this._getFrecencyKey());
+    const savedData = this._storageProvider.getItem(this._getFrecencyKey());
     if (!savedData) return defaultFrecency;
 
     try {
@@ -91,7 +93,7 @@ class Frecency {
    */
   _saveFrecencyData(frecency: FrecencyData): void {
     if (!this._localStorageEnabled) return;
-    localStorage.setItem(this._getFrecencyKey(), JSON.stringify(frecency));
+    this._storageProvider.setItem(this._getFrecencyKey(), JSON.stringify(frecency));
   }
 
   /**
