@@ -1,6 +1,9 @@
 // @flow
 import type { FrecencyData, FrecencyOptions, SaveParams, SortParams, StorageProvider } from './types';
-import { isSubQuery, storageCapabilitiesAvailable } from './utils';
+import {
+  isSubQuery,
+  loadStorageProvider,
+} from './utils';
 
 class Frecency {
   // Used to create key that will be used to save frecency data in localStorage.
@@ -12,7 +15,6 @@ class Frecency {
   // Attribute to use as the search result's id.
   _idAttribute: string | Function;
 
-  _localStorageEnabled: boolean;
   _storageProvider: StorageProvider;
   _frecency: FrecencyData;
 
@@ -23,10 +25,8 @@ class Frecency {
     this._timestampsLimit = timestampsLimit || 10;
     this._recentSelectionsLimit = recentSelectionsLimit || 100;
     this._idAttribute = idAttribute || '_id';
-    this._storageProvider = storageProvider || localStorage;
+    this._storageProvider = loadStorageProvider(storageProvider);
 
-    // If localStorage is disabled, the methods in this class will be no-ops.
-    this._localStorageEnabled = storageCapabilitiesAvailable(this._storageProvider);
     this._frecency = this._getFrecencyData();
   }
 
@@ -37,7 +37,7 @@ class Frecency {
    *   @prop {String} selectedId - String representing the ID of the search result selected.
    */
   save({ searchQuery, selectedId }: SaveParams): void {
-    if (!selectedId || !this._localStorageEnabled) return;
+    if (!selectedId) return;
 
     const now = Date.now();
 
@@ -75,8 +75,6 @@ class Frecency {
       recentSelections: []
     };
 
-    if (!this._localStorageEnabled) return defaultFrecency;
-
     const savedData = this._storageProvider.getItem(this._getFrecencyKey());
     if (!savedData) return defaultFrecency;
 
@@ -92,7 +90,6 @@ class Frecency {
    * @param {FrecencyData} frecency
    */
   _saveFrecencyData(frecency: FrecencyData): void {
-    if (!this._localStorageEnabled) return;
     this._storageProvider.setItem(this._getFrecencyKey(), JSON.stringify(frecency));
   }
 
@@ -233,7 +230,6 @@ class Frecency {
    * @return {Object[]} Search results sorted by frecency.
    */
   sort({ searchQuery, results }: SortParams): Object[] {
-    if (!this._localStorageEnabled) return results;
     this._calculateFrecencyScores(results, searchQuery);
 
     // For recent selections, sort by frecency. Otherwise, fall back to

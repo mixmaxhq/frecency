@@ -22,7 +22,11 @@ export default {
   output: [
     {
       format: 'es',
-      file: 'dist/index.js'
+      file: pkg.browser['./index.js']
+    },
+    {
+      format: 'cjs',
+      file: pkg.main
     }
   ]
 };

@@ -8,16 +8,6 @@ describe('frecency', () => {
   });
 
   describe('#save', () => {
-    it('should not throw if localStorage is disabled.', () => {
-      global.localStorage = undefined;
-      const frecency = new Frecency({ key: 'templates' });
-
-      expect(frecency.save({
-        searchQuery: 'search',
-        selectedId: 'test'
-      })).toBeUndefined();
-    });
-
     it('stores multiple queries.', () => {
       const frecency = new Frecency({ key: 'templates' });
 

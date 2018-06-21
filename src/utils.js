@@ -1,4 +1,6 @@
 // @flow
+import type { StorageProvider } from './types';
+
 /**
  * Performs a by-word prefix match to determine if a string is a sub query
  * of a given query. For example:
@@ -34,8 +36,21 @@ export function isSubQuery(str: ?string, query: string): boolean {
   return true;
 }
 
-// Returns true if storageProvider respect is enabled. False otherwise.
-export function storageCapabilitiesAvailable(storageProvider: any) {
+// Switch to browser localStorage or raise an error if the storageProvider
+// is not provided and localStorage is not available
+export function loadStorageProvider(storageProvider: ?StorageProvider) {
+  if (storageProvider) {
+    return storageProvider;
+  }
+
+  if (localStorage && storageAvailable(localStorage)) {
+    return localStorage;
+  }
+
+  throw new Error('Missing Storage Provider');
+}
+
+function storageAvailable(storageProvider: any) {
   const mod = '____featurecheck____';
   try {
     storageProvider.setItem(mod, mod);

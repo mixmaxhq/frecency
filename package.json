@@ -2,7 +2,10 @@
   "name": "frecency",
   "version": "1.0.4",
   "description": "Frecency sorting for search results.",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
+  "browser": {
+    "./index.js": "dist/browser.js"
+  },
   "files": [
     "dist",
     "src"
