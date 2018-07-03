@@ -1,3 +1,6 @@
 {
-  "extends": ["mixmax/browser", "mixmax/flow"]
+  "extends": ["mixmax/browser", "mixmax/flow"],
+  "globals": {
+    "__SERVER__": true
+  }
 }

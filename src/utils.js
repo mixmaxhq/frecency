@@ -1,6 +1,8 @@
 // @flow
 import type { StorageProvider } from './types';
 
+declare var __SERVER__: boolean;
+
 /**
  * Performs a by-word prefix match to determine if a string is a sub query
  * of a given query. For example:
@@ -38,19 +40,21 @@ export function isSubQuery(str: ?string, query: string): boolean {
 
 // Switch to browser localStorage or raise an error if the storageProvider
 // is not provided and localStorage is not available
-export function loadStorageProvider(storageProvider: ?StorageProvider) {
+export function loadStorageProvider(storageProvider: ?StorageProvider): ?StorageProvider {
   if (storageProvider) {
     return storageProvider;
   }
 
-  if (localStorage && storageAvailable(localStorage)) {
+  if (!__SERVER__ && typeof localStorage !== 'undefined' && localStorageEnabled(localStorage)) {
     return localStorage;
   }
 
-  throw new Error('Missing Storage Provider');
+  if (__SERVER__) {
+    throw new Error('Missing Storage Provider');
+  }
 }
 
-function storageAvailable(storageProvider: any) {
+function localStorageEnabled(storageProvider: any) {
   const mod = '____featurecheck____';
   try {
     storageProvider.setItem(mod, mod);

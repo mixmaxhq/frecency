@@ -4,14 +4,11 @@ import { LocalStorageMock } from './mocks';
 
 describe('frecency', () => {
   beforeEach(() => {
+    global.__SERVER__ = true;
     global.localStorage = new LocalStorageMock();
   });
 
   describe('#storageProvider', () => {
-    it('should instantiate correctly with global localStorage', () => {
-      expect(() => new Frecency({ key: 'templates' })).not.toThrow('Missing Storage Provider');
-    });
-
     it('should instantiate correctly with given storage provider', () => {
       const storageProvider = new LocalStorageMock();
       expect(() => new Frecency({ key: 'templates', storageProvider })).not.toThrow('Missing Storage Provider');

@@ -7,10 +7,29 @@ const day = 24 * hour;
 
 describe('frecency', () => {
   beforeEach(() => {
+    global.__SERVER__ = false;
     global.localStorage = new LocalStorageMock();
   });
 
   describe('#sort', () => {
+    it('should not throw if localStorage is disabled.', () => {
+      global.localStorage = undefined;
+      const frecency = new Frecency({ key: 'templates' });
+
+      expect(frecency.sort({
+        searchQuery: 'brad',
+        results: [{
+          _id: 'brad vogel'
+        }, {
+          _id: 'simon xiong'
+        }]
+      })).toEqual([{
+        _id: 'brad vogel'
+      }, {
+        _id: 'simon xiong'
+      }]);
+    });
+
     it('should not sort if frecency is empty.', () => {
       const frecency = new Frecency({ key: 'templates' });
 
