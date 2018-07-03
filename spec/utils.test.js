@@ -1,5 +1,5 @@
 // @flow
-import { isSubQuery } from '../../src/browser/utils';
+import { isSubQuery } from '../src/utils';
 
 describe('utils', () => {
   describe('isSubQuery', () => {

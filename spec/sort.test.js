@@ -1,5 +1,5 @@
 // @flow
-import Frecency from '../../src/browser';
+import Frecency from '../src';
 import { LocalStorageMock } from './mocks';
 
 const hour = 1000 * 60 * 60;
@@ -7,6 +7,7 @@ const day = 24 * hour;
 
 describe('frecency', () => {
   beforeEach(() => {
+    global.__SERVER__ = false;
     global.localStorage = new LocalStorageMock();
   });
 
