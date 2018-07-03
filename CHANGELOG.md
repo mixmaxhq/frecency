@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.1.0 Add support for custom storage providers i.e. Node (#8 - @hugomano)
+
 * 1.0.4 Improve readme and install instructions.
 
 * 1.0.3 Add license.
