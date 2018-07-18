@@ -54,6 +54,10 @@ onSearch: (searchQuery) => {
 }
 ```
 
+Frecency adds and removes `_frecencyScore` attribute for compare results.
+You can output results with scores by assigning `keepFrecencyScore` parameter to `true`. 
+
+
 ## Configuring Frecency
 Frecency will sort on the `_id` attribute by default. You can change this by setting an
 `idAttribute` in the constructor:

@@ -67,5 +67,6 @@ export type SaveParams = {
 
 export type SortParams = {
   searchQuery: ?string,
-  results: Object[]
+  results: Object[],
+  keepFrecencyScore: boolean
 };
