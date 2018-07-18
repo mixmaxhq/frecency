@@ -55,7 +55,7 @@ onSearch: (searchQuery) => {
 ```
 
 Frecency adds and removes `_frecencyScore` attribute for compare results.
-You can output results with scores by assigning `keepFrecencyScore` parameter to `true`. 
+You can output results with scores by assigning `keepScores` parameter to `true`. 
 
 
 ## Configuring Frecency

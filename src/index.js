@@ -236,7 +236,7 @@ class Frecency {
    *   @prop {boolean} keepFrecencyScore - Keep the frecency score attached to each item.
    * @return {Object[]} Search results sorted by frecency.
    */
-  sort({ searchQuery, results, keepFrecencyScore = false }: SortParams): Object[] {
+  sort({ searchQuery, results, keepScores = false }: SortParams): Object[] {
     if (!this._localStorageEnabled) return results;
     this._calculateFrecencyScores(results, searchQuery);
 
@@ -250,7 +250,7 @@ class Frecency {
       ...otherSelections
     ];
 
-    if (keepFrecencyScore) return sortedResults;
+    if (keepScores) return sortedResults;
 
     return sortedResults.map((result) => {
       delete result._frecencyScore;
