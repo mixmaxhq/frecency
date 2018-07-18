@@ -233,7 +233,7 @@ class Frecency {
    * @param {Object} params
    *   @prop {String} searchQuery - The search query the user entered.
    *   @prop {Object[]} results - The list of search results to sort.
-   *   @prop {boolean} keepFrecencyScore - Keep the frecency score attached to each item.
+   *   @prop {boolean} keepScores - Keep the frecency score attached to each item.
    * @return {Object[]} Search results sorted by frecency.
    */
   sort({ searchQuery, results, keepScores = false }: SortParams): Object[] {

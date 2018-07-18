@@ -68,5 +68,5 @@ export type SaveParams = {
 export type SortParams = {
   searchQuery: ?string,
   results: Object[],
-  keepScores: boolean
+  keepScores?: boolean
 };
