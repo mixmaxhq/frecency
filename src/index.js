@@ -20,10 +20,10 @@ class Frecency {
   _frecency: FrecencyData;
 
   _exactQueryMatchWeight: number;
-  _subQueryWeight: number;
-  _recentWeight: number;
+  _subQueryMatchWeight: number;
+  _recentSelectionsMatchWeight: number;
 
-  constructor({ key, timestampsLimit, recentSelectionsLimit, idAttribute, storageProvider, exactQueryMatchWeight, subQueryWeight, recentWeight }: FrecencyOptions) {
+  constructor({ key, timestampsLimit, recentSelectionsLimit, idAttribute, storageProvider, exactQueryMatchWeight, subQueryMatchWeight, recentSelectionsMatchWeight }: FrecencyOptions) {
     if (!key) throw new Error('key is required.');
 
     this._key = key;
@@ -33,8 +33,8 @@ class Frecency {
     this._storageProvider = loadStorageProvider(storageProvider);
     this._localStorageEnabled = Boolean(this._storageProvider);
     this._exactQueryMatchWeight = exactQueryMatchWeight || 1.0;
-    this._subQueryWeight = subQueryWeight || 0.7;
-    this._recentWeight = recentWeight || 0.5;
+    this._subQueryMatchWeight = subQueryMatchWeight || 0.7;
+    this._recentSelectionsMatchWeight = recentSelectionsMatchWeight || 0.5;
 
     this._frecency = this._getFrecencyData();
   }
@@ -318,7 +318,7 @@ class Frecency {
 
         if (selection) {
           // Reduce the score because this is not an exact query match.
-          result._frecencyScore = this._subQueryWeight * this._calculateScore(selection.selectedAt,
+          result._frecencyScore = this._subQueryMatchWeight * this._calculateScore(selection.selectedAt,
             selection.timesSelected, now);
           return;
         }
@@ -328,7 +328,7 @@ class Frecency {
       const selection = this._frecency.selections[resultId];
       if (selection) {
         // Reduce the score because this is not an exact query match.
-        result._frecencyScore = this._recentWeight * this._calculateScore(selection.selectedAt,
+        result._frecencyScore = this._recentSelectionsMatchWeight * this._calculateScore(selection.selectedAt,
           selection.timesSelected, now);
         return;
       }
