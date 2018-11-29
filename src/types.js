@@ -57,7 +57,10 @@ export type FrecencyOptions = {
   timestampsLimit?: number,
   recentSelectionsLimit?: number,
   idAttribute?: string | Function,
-  storageProvider?: StorageProvider
+  storageProvider?: StorageProvider,
+  exactQueryWeight?: number,
+  subQueryWeight?: number,
+  recentWeight?: number,
 };
 
 export type SaveParams = {
