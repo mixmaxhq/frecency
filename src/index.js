@@ -34,7 +34,7 @@ class Frecency {
     this._localStorageEnabled = Boolean(this._storageProvider);
     this._exactQueryMatchWeight = exactQueryMatchWeight || 1.0;
     this._subQueryWeight = subQueryWeight || 0.7;
-    this._recentWeight = subQueryWeight || 0.5;
+    this._recentWeight = recentWeight || 0.5;
 
     this._frecency = this._getFrecencyData();
   }
