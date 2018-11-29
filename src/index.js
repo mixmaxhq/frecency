@@ -294,7 +294,7 @@ class Frecency {
         if (selection) {
           result._frecencyScore = this._calculateScore(selection.selectedAt,
             selection.timesSelected, now);
-          return;
+          if (result._frecencyScore > 0) return;
         }
       }
 
@@ -313,7 +313,7 @@ class Frecency {
           // Reduce the score because this is not an exact query match.
           result._frecencyScore = 0.7 * this._calculateScore(selection.selectedAt,
             selection.timesSelected, now);
-          return;
+          if (result._frecencyScore > 0) return;
         }
       }
 
