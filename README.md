@@ -138,3 +138,16 @@ new Frecency({
   storageProvider
 });
 ```
+
+### Configure weights
+
+Differents weights are applied depending on what kind of match it is about
+
+```js
+new Frecency({
+  key: 'people',
+  exactQueryWeight: 0.9, // default to 1.0
+  subQueryWeight: 0.5, // default to 0.7
+  recentWeight: 0.1, // default to 0.5
+});
+```
