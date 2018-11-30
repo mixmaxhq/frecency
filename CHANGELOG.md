@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.3.1 fallback on other score computation when an entry is too old #11
+
 * 1.3.0 make weights configurable #12
 
 * 1.2.0 Add keepScores to SortParams [backward compatible] #10
