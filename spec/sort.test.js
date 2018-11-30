@@ -364,5 +364,82 @@ describe('frecency', () => {
         groupName: 'testing group'
       }]);
     });
+
+    it('fallbacks on subquery matching when query entry is too old (> 14 days)', () => {
+      const frecency = new Frecency({ key: 'templates' });
+      const now = 1524085045510;
+
+      global.Date.now = jest.fn(() => now - 15 * day);
+      frecency.save({
+        searchQuery: 'br',
+        selectedId: 'brad neuberg'
+      });
+
+      global.Date.now = jest.fn(() => now - 2 * day);
+      frecency.save({
+        searchQuery: 'brad',
+        selectedId: 'brad neuberg'
+      });
+
+      global.Date.now = jest.fn(() => now);
+
+      const results = frecency.sort({
+        searchQuery: 'br',
+        results: [{
+          _id: 'brad vogel'
+        }, {
+          _id: 'simon xiong'
+        }, {
+          _id: 'brad neuberg'
+        }]
+      });
+
+      expect(results).toEqual([{
+        _id: 'brad neuberg'
+      }, {
+        _id: 'brad vogel'
+      }, {
+        _id: 'simon xiong'
+      }]);
+    });
+
+
+    it('fallbacks on recent selections matching when queries/subqueries are too old (> 14 days)', () => {
+      const frecency = new Frecency({ key: 'templates' });
+      const now = 1524085045510;
+
+      global.Date.now = jest.fn(() => now - 15 * day);
+      frecency.save({
+        searchQuery: 'brad',
+        selectedId: 'brad neuberg'
+      });
+
+      global.Date.now = jest.fn(() => now - 2 * day);
+      frecency.save({
+        searchQuery: 'bra',
+        selectedId: 'brad neuberg'
+      });
+
+      global.Date.now = jest.fn(() => now);
+
+      const results = frecency.sort({
+        searchQuery: 'brad',
+        results: [{
+          _id: 'brad vogel'
+        }, {
+          _id: 'simon xiong'
+        }, {
+          _id: 'brad neuberg'
+        }]
+      });
+
+      expect(results).toEqual([{
+        _id: 'brad neuberg'
+      }, {
+        _id: 'brad vogel'
+      }, {
+        _id: 'simon xiong'
+      }]);
+    });
   });
 });
