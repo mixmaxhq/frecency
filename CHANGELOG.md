@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.3.0 make weights configurable #12
+
 * 1.2.0 Add keepScores to SortParams [backward compatible] #10
 
 * 1.1.0 Add support for custom storage providers i.e. Node (#8 - @hugomano)
