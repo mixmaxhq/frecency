@@ -42,13 +42,14 @@ class Frecency {
   /**
    * Updates frecency data after user selects a result.
    * @param {Object} params
-   *   @prop {String} searchQuery - The search query the user entered.
    *   @prop {String} selectedId - String representing the ID of the search result selected.
+   *   @prop {String} [searchQuery] - The search query the user entered.
+   *   @prop {Number} [dateSelection] - The date in milliseconds on which item has been selected.
    */
-  save({ searchQuery, selectedId }: SaveParams): void {
+  save({ searchQuery, selectedId, dateSelection }: SaveParams): void {
     if (!selectedId || !this._localStorageEnabled) return;
 
-    const now = Date.now();
+    const date = dateSelection || Date.now();
 
     // Reload frecency here to pick up frecency updates from other tabs.
     const frecency = this._getFrecencyData();
@@ -56,13 +57,13 @@ class Frecency {
     // Associate the selection with the search query used. This lets us sort this
     // selection higher when the user enters the search query again. See:
     // https://slack.engineering/a-faster-smarter-quick-switcher-77cbc193cb60#80de
-    this._updateFrecencyByQuery(frecency, searchQuery, selectedId, now);
+    this._updateFrecencyByQuery(frecency, searchQuery, selectedId, date);
 
     // Associate the selection with its ID. If the user doesn't enter the same search
     // query as before, but this selection shows up in the list of results, we still
     // want this selection to show up higher because it was recently selected. See:
     // https://slack.engineering/a-faster-smarter-quick-switcher-77cbc193cb60#700c
-    this._updateFrecencyById(frecency, searchQuery, selectedId, now);
+    this._updateFrecencyById(frecency, searchQuery, selectedId, date);
 
     this._cleanUpOldIds(frecency, selectedId);
     this._saveFrecencyData(frecency);
@@ -111,10 +112,10 @@ class Frecency {
    * @param {FrecencyData} frecency - Frecency object to be modified in place.
    * @param {String} searchQuery - Search query the user entered.
    * @param {String} selectedId - ID of search result the user selected.
-   * @param {Number} now - Current time in milliseconds.
+   * @param {Number} dateSelection - Time in milliseconds.
    */
   _updateFrecencyByQuery(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
-    now: number): void {
+    dateSelection: number): void {
     if (!searchQuery) return;
 
     const queries = frecency.queries;
@@ -130,14 +131,14 @@ class Frecency {
       queries[searchQuery].push({
         id: selectedId,
         timesSelected: 1,
-        selectedAt: [now]
+        selectedAt: [dateSelection]
       });
       return;
     }
 
     // Otherwise, increment the previous entry.
     previousSelection.timesSelected += 1;
-    previousSelection.selectedAt.push(now);
+    previousSelection.selectedAt.push(dateSelection);
 
     // Limit the selections timestamps.
     if (previousSelection.selectedAt.length > this._timestampsLimit) {
@@ -150,10 +151,10 @@ class Frecency {
    * @param {FrecencyData} frecency - Frecency object to be modified in place.
    * @param {String} searchQuery - Search query the user entered.
    * @param {String} selectedId - ID of search result the user selected.
-   * @param {Number} now - Current time in milliseconds.
+   * @param {Number} dateSelection - Time in milliseconds.
    */
   _updateFrecencyById(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
-    now: number): void {
+    dateSelection: number): void {
 
     const selections = frecency.selections;
     const previousSelection = selections[selectedId];
@@ -162,7 +163,7 @@ class Frecency {
     if (!previousSelection) {
       selections[selectedId] = {
         timesSelected: 1,
-        selectedAt: [now],
+        selectedAt: [dateSelection],
         queries: {}
       };
 
@@ -172,7 +173,7 @@ class Frecency {
 
     // Otherwise, update the previous entry.
     previousSelection.timesSelected += 1;
-    previousSelection.selectedAt.push(now);
+    previousSelection.selectedAt.push(dateSelection);
 
     // Limit the selections timestamps.
     if (previousSelection.selectedAt.length > this._timestampsLimit) {
@@ -342,21 +343,21 @@ class Frecency {
    * the total number of times selected, and the current time.
    * @param {Number[]} timestamps - Timestamps of recent selections.
    * @param {Number} timesSelected - Total number of times selected.
-   * @param {Number} now - Current time in milliseconds.
+   * @param {Number} dateSelection - Time in milliseconds.
    * @return {Number} The calculated frecency score.
    */
-  _calculateScore(timestamps: number[], timesSelected: number, now: number): number {
+  _calculateScore(timestamps: number[], timesSelected: number, dateSelection: number): number {
     if (timestamps.length === 0) return 0;
 
     const hour = 1000 * 60 * 60;
     const day = 24 * hour;
 
     const totalScore = timestamps.reduce((score, timestamp) => {
-      if (timestamp >= now - 3 * hour) return score + 100;
-      if (timestamp >= now - day) return score + 80;
-      if (timestamp >= now - 3 * day) return score + 60;
-      if (timestamp >= now - 7 * day) return score + 30;
-      if (timestamp >= now - 14 * day) return score + 10;
+      if (timestamp >= dateSelection - 3 * hour) return score + 100;
+      if (timestamp >= dateSelection - day) return score + 80;
+      if (timestamp >= dateSelection - 3 * day) return score + 60;
+      if (timestamp >= dateSelection - 7 * day) return score + 30;
+      if (timestamp >= dateSelection - 14 * day) return score + 10;
       return score;
     }, 0);
 
