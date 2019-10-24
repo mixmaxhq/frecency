@@ -64,9 +64,9 @@ export type FrecencyOptions = {
 };
 
 export type SaveParams = {
-  selectedId: string
+  selectedId: string,
   searchQuery: ?string,
-  dateSelection: ?number,
+  dateSelection?: number,
 };
 
 export type SortParams = {

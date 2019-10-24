@@ -43,7 +43,7 @@ class Frecency {
    * Updates frecency data after user selects a result.
    * @param {Object} params
    *   @prop {String} selectedId - String representing the ID of the search result selected.
-   *   @prop {String} [searchQuery] - The search query the user entered.
+   *   @prop {String} searchQuery - The search query the user entered.
    *   @prop {Number} [dateSelection] - The date in milliseconds on which item has been selected.
    */
   save({ searchQuery, selectedId, dateSelection }: SaveParams): void {
