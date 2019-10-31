@@ -44,12 +44,12 @@ class Frecency {
    * @param {Object} params
    *   @prop {String} selectedId - String representing the ID of the search result selected.
    *   @prop {String} searchQuery - The search query the user entered.
-   *   @prop {Number} [dateSelection] - The date in milliseconds on which item has been selected.
+   *   @prop {Date} [dateSelection] - The date on which item has been selected.
    */
   save({ searchQuery, selectedId, dateSelection }: SaveParams): void {
     if (!selectedId || !this._localStorageEnabled) return;
 
-    const date = dateSelection || Date.now();
+    const date = dateSelection ? dateSelection.getTime() : Date.now();
 
     // Reload frecency here to pick up frecency updates from other tabs.
     const frecency = this._getFrecencyData();
@@ -112,10 +112,10 @@ class Frecency {
    * @param {FrecencyData} frecency - Frecency object to be modified in place.
    * @param {String} searchQuery - Search query the user entered.
    * @param {String} selectedId - ID of search result the user selected.
-   * @param {Number} dateSelection - Time in milliseconds.
+   * @param {Number} timestampSelection - Time in milliseconds.
    */
   _updateFrecencyByQuery(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
-    dateSelection: number): void {
+    timestampSelection: number): void {
     if (!searchQuery) return;
 
     const queries = frecency.queries;
@@ -131,14 +131,14 @@ class Frecency {
       queries[searchQuery].push({
         id: selectedId,
         timesSelected: 1,
-        selectedAt: [dateSelection]
+        selectedAt: [timestampSelection]
       });
       return;
     }
 
     // Otherwise, increment the previous entry.
     previousSelection.timesSelected += 1;
-    previousSelection.selectedAt.push(dateSelection);
+    previousSelection.selectedAt.push(timestampSelection);
 
     // Limit the selections timestamps.
     if (previousSelection.selectedAt.length > this._timestampsLimit) {
@@ -151,10 +151,10 @@ class Frecency {
    * @param {FrecencyData} frecency - Frecency object to be modified in place.
    * @param {String} searchQuery - Search query the user entered.
    * @param {String} selectedId - ID of search result the user selected.
-   * @param {Number} dateSelection - Time in milliseconds.
+   * @param {Number} timestampSelection - Time in milliseconds.
    */
   _updateFrecencyById(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
-    dateSelection: number): void {
+    timestampSelection: number): void {
 
     const selections = frecency.selections;
     const previousSelection = selections[selectedId];
@@ -163,7 +163,7 @@ class Frecency {
     if (!previousSelection) {
       selections[selectedId] = {
         timesSelected: 1,
-        selectedAt: [dateSelection],
+        selectedAt: [timestampSelection],
         queries: {}
       };
 
@@ -173,7 +173,7 @@ class Frecency {
 
     // Otherwise, update the previous entry.
     previousSelection.timesSelected += 1;
-    previousSelection.selectedAt.push(dateSelection);
+    previousSelection.selectedAt.push(timestampSelection);
 
     // Limit the selections timestamps.
     if (previousSelection.selectedAt.length > this._timestampsLimit) {
@@ -343,21 +343,21 @@ class Frecency {
    * the total number of times selected, and the current time.
    * @param {Number[]} timestamps - Timestamps of recent selections.
    * @param {Number} timesSelected - Total number of times selected.
-   * @param {Number} dateSelection - Time in milliseconds.
+   * @param {Number} timestampSelection - Time in milliseconds.
    * @return {Number} The calculated frecency score.
    */
-  _calculateScore(timestamps: number[], timesSelected: number, dateSelection: number): number {
+  _calculateScore(timestamps: number[], timesSelected: number, timestampSelection: number): number {
     if (timestamps.length === 0) return 0;
 
     const hour = 1000 * 60 * 60;
     const day = 24 * hour;
 
     const totalScore = timestamps.reduce((score, timestamp) => {
-      if (timestamp >= dateSelection - 3 * hour) return score + 100;
-      if (timestamp >= dateSelection - day) return score + 80;
-      if (timestamp >= dateSelection - 3 * day) return score + 60;
-      if (timestamp >= dateSelection - 7 * day) return score + 30;
-      if (timestamp >= dateSelection - 14 * day) return score + 10;
+      if (timestamp >= timestampSelection - 3 * hour) return score + 100;
+      if (timestamp >= timestampSelection - day) return score + 80;
+      if (timestamp >= timestampSelection - 3 * day) return score + 60;
+      if (timestamp >= timestampSelection - 7 * day) return score + 30;
+      if (timestamp >= timestampSelection - 14 * day) return score + 10;
       return score;
     }, 0);
 
