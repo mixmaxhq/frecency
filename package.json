@@ -3,7 +3,7 @@
   "version": "1.0.4",
   "description": "Frecency sorting for search results.",
   "browser": {
-    "./index.js": "dist/browser/index.js"
+    "./index.js": "./dist/browser/index.js"
   },
   "files": [
     "dist",
