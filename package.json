@@ -11,13 +11,16 @@
     "src"
   ],
   "scripts": {
+    "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",
     "ci": "npm run lint && npm run build",
+    "ci:commitlint": "commitlint-jenkins --pr-only",
     "lint": "eslint . && flow",
     "prebuild": "rm -rf dist/",
-    "build": "[ \"$WATCH\" == 'true' ] && rollup -cw || rollup -c",
+    "prepublish": "npm run lint && npm run build && npm test",
+    "prepublishOnly": "if [ \"$CI\" = '' ]; then node -p 'JSON.parse(process.env.npm_package_config_manualPublishMessage)'; exit 1; fi",
+    "semantic-release": "semantic-release",
     "test": "npm run build && jest",
-    "watch": "WATCH=true yarn build",
-    "prepublish": "npm run lint && npm run build && npm test"
+    "watch": "WATCH=true yarn build"
   },
   "repository": {
     "type": "git",
@@ -30,11 +33,15 @@
   },
   "homepage": "https://github.com/mixmaxhq/frecency#readme",
   "devDependencies": {
+    "@commitlint/config-conventional": "^8.3.4",
+    "@mixmaxhq/commitlint-jenkins": "^1.4.2",
+    "@mixmaxhq/semantic-release-config": "^1.2.7",
     "babel-core": "^6.26.0",
     "babel-jest": "^22.4.3",
     "babel-plugin-external-helpers": "^6.18.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
+    "cz-conventional-changelog": "^3.0.2",
     "eslint": "^4.19.1",
     "eslint-config-mixmax": "^1.0.0",
     "eslint-plugin-flowtype": "^2.46.1",
@@ -42,6 +49,24 @@
     "jest": "^22.4.3",
     "rollup": "^0.57.1",
     "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-replace": "^2.0.0"
+    "rollup-plugin-replace": "^2.0.0",
+    "semantic-release": "^16.0.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    },
+    "manualPublishMessage": "This repository is configured to use semantic-release for its releases. Please do not release manually.\n"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "release": {
+    "extends": "@mixmaxhq/semantic-release-config"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
