@@ -36,7 +36,7 @@
     "@mixmaxhq/commitlint-jenkins": "^1.4.2",
     "@mixmaxhq/semantic-release-config": "^2.0.0",
     "babel-core": "^6.26.0",
-    "babel-jest": "^22.4.3",
+    "babel-jest": "^24.9.0",
     "babel-plugin-external-helpers": "^6.18.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
