@@ -1,3 +1,10 @@
+### [1.3.2](https://github.com/mixmaxhq/frecency/compare/v1.3.1...v1.3.2) (2020-01-18)
+
+
+### Bug Fixes
+
+* **import:** use relative paths to support webpack ([26dfda4](https://github.com/mixmaxhq/frecency/commit/26dfda4b83f2a72e9b9843557b73424e841e6432))
+
 ## Release History
 
 * 1.3.1 fallback on other score computation when an entry is too old #11
