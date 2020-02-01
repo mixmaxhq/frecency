@@ -32,8 +32,10 @@
   },
   "homepage": "https://github.com/mixmaxhq/frecency#readme",
   "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@mixmaxhq/commitlint-jenkins": "^1.4.2",
+    "@mixmaxhq/git-hooks": "^1.0.1",
     "@mixmaxhq/semantic-release-config": "^2.0.0",
     "babel-core": "^6.26.0",
     "babel-jest": "^24.9.0",
