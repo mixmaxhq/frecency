@@ -38,7 +38,7 @@
     "@mixmaxhq/git-hooks": "^1.1.0",
     "@mixmaxhq/semantic-release-config": "^2.0.0",
     "babel-core": "^6.26.0",
-    "babel-jest": "^24.9.0",
+    "babel-jest": "^25.2.0",
     "babel-plugin-external-helpers": "^6.18.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
