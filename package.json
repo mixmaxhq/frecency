@@ -46,7 +46,7 @@
     "eslint": "^4.19.1",
     "eslint-config-mixmax": "^1.3.0",
     "eslint-plugin-flowtype": "^3.10.4",
-    "flow-bin": "^0.75.0",
+    "flow-bin": "^0.125.1",
     "jest": "^24.9.0",
     "rollup": "^0.57.1",
     "rollup-plugin-babel": "^2.6.1",
