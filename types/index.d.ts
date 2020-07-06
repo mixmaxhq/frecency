@@ -3,7 +3,7 @@
 
 // TypeScript Version: 3.9
 
-declare module "@getstation/frecency" {
+declare module '@getstation/frecency' {
   export type idAttrFn = (result: string) => string;
 
   export type StorageProvider = {
@@ -23,17 +23,14 @@ declare module "@getstation/frecency" {
       subQueryMatchWeight?: number;
       recentSelectionsMatchWeight?: number;
     });
-    save: (arg: {
-      searchQuery: string;
-      selectedId: string;
-      dateSelection?: Date;
-    }) => void;
+    save: (params: { searchQuery: string; selectedId: string; dateSelection?: Date }) => void;
     sort:
-      | ((arg: { searchQuery: string; results: T[] }) => T[])
-      | ((arg: {
+      | ((params: { searchQuery: string; results: T[] }) => T[])
+      | ((params: {
           searchQuery: string;
           results: T[];
           keepScores?: boolean;
         }) => Array<T & { _frecencyScore?: number }>);
+    computeScore: (params: { searchQuery: string; item: T; now?: number }) => number;
   }
 }

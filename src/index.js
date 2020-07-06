@@ -1,9 +1,13 @@
 // @flow
-import type { FrecencyData, FrecencyOptions, SaveParams, SortParams, StorageProvider } from './types';
-import {
-  isSubQuery,
-  loadStorageProvider,
-} from './utils';
+import type {
+  FrecencyData,
+  FrecencyOptions,
+  ComputeScoreParams,
+  SaveParams,
+  SortParams,
+  StorageProvider,
+} from './types';
+import { isSubQuery, loadStorageProvider } from './utils';
 
 class Frecency {
   // Used to create key that will be used to save frecency data in localStorage.
@@ -23,7 +27,16 @@ class Frecency {
   _subQueryMatchWeight: number;
   _recentSelectionsMatchWeight: number;
 
-  constructor({ key, timestampsLimit, recentSelectionsLimit, idAttribute, storageProvider, exactQueryMatchWeight, subQueryMatchWeight, recentSelectionsMatchWeight }: FrecencyOptions) {
+  constructor({
+    key,
+    timestampsLimit,
+    recentSelectionsLimit,
+    idAttribute,
+    storageProvider,
+    exactQueryMatchWeight,
+    subQueryMatchWeight,
+    recentSelectionsMatchWeight,
+  }: FrecencyOptions) {
     if (!key) throw new Error('key is required.');
 
     this._key = key;
@@ -82,7 +95,7 @@ class Frecency {
     const defaultFrecency: FrecencyData = {
       queries: {},
       selections: {},
-      recentSelections: []
+      recentSelections: [],
     };
 
     if (!this._localStorageEnabled || !this._storageProvider) return defaultFrecency;
@@ -114,8 +127,12 @@ class Frecency {
    * @param {String} selectedId - ID of search result the user selected.
    * @param {Number} timestampSelection - Time in milliseconds.
    */
-  _updateFrecencyByQuery(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
-    timestampSelection: number): void {
+  _updateFrecencyByQuery(
+    frecency: FrecencyData,
+    searchQuery: ?string,
+    selectedId: string,
+    timestampSelection: number,
+  ): void {
     if (!searchQuery) return;
 
     const queries = frecency.queries;
@@ -131,7 +148,7 @@ class Frecency {
       queries[searchQuery].push({
         id: selectedId,
         timesSelected: 1,
-        selectedAt: [timestampSelection]
+        selectedAt: [timestampSelection],
       });
       return;
     }
@@ -153,9 +170,12 @@ class Frecency {
    * @param {String} selectedId - ID of search result the user selected.
    * @param {Number} timestampSelection - Time in milliseconds.
    */
-  _updateFrecencyById(frecency: FrecencyData, searchQuery: ?string, selectedId: string,
-    timestampSelection: number): void {
-
+  _updateFrecencyById(
+    frecency: FrecencyData,
+    searchQuery: ?string,
+    selectedId: string,
+    timestampSelection: number,
+  ): void {
     const selections = frecency.selections;
     const previousSelection = selections[selectedId];
 
@@ -164,7 +184,7 @@ class Frecency {
       selections[selectedId] = {
         timesSelected: 1,
         selectedAt: [timestampSelection],
-        queries: {}
+        queries: {},
       };
 
       if (searchQuery) selections[selectedId].queries[searchQuery] = true;
@@ -196,19 +216,13 @@ class Frecency {
 
     // If frecency already contains the selected ID, shift it to the front.
     if (recentSelections.includes(selectedId)) {
-      frecency.recentSelections = [
-        selectedId,
-        ...recentSelections.filter((id) => id !== selectedId)
-      ];
+      frecency.recentSelections = [selectedId, ...recentSelections.filter((id) => id !== selectedId)];
       return;
     }
 
     // Otherwise add the selected ID to the front of the list.
     if (recentSelections.length < this._recentSelectionsLimit) {
-      frecency.recentSelections = [
-        selectedId,
-        ...recentSelections
-      ];
+      frecency.recentSelections = [selectedId, ...recentSelections];
       return;
     }
 
@@ -216,10 +230,7 @@ class Frecency {
     // the least recently used ID from the frecency data.
     const idToRemove = recentSelections.pop();
 
-    frecency.recentSelections = [
-      selectedId,
-      ...recentSelections
-    ];
+    frecency.recentSelections = [selectedId, ...recentSelections];
 
     const selectionById = frecency.selections[idToRemove];
     if (!selectionById) return;
@@ -237,6 +248,64 @@ class Frecency {
   }
 
   /**
+   * Calculates frecency score for given search result.
+   *
+   * @param {object[]} item - search result to calculate score for
+   * @param {string} searchQuery - Search query the user entered
+   * @param {number} now - the current Date.now()
+   * @return {number} computed frecency score
+   */
+  computeScore({ searchQuery, item, now }: ComputeScoreParams): number {
+    now = now || Date.now();
+    const result = item;
+    const resultId = this._getId(result);
+
+    // Try calculating frecency score by exact query match.
+    const frecencyForQuery = searchQuery && this._frecency.queries[searchQuery];
+
+    if (frecencyForQuery) {
+      const selection = frecencyForQuery.find((selection) => {
+        return selection.id === resultId;
+      });
+
+      if (selection) {
+        const frecencyScore =
+          this._exactQueryMatchWeight * this._calculateScore(selection.selectedAt, selection.timesSelected, now);
+        if (frecencyScore > 0) return frecencyScore;
+      }
+    }
+
+    // Try calculating frecency score by sub-query match.
+    const subQueries = Object.keys(this._frecency.queries).filter((query) => {
+      return isSubQuery(searchQuery, query);
+    });
+
+    // Use for-loop to allow early-return.
+    for (const subQuery of subQueries) {
+      const selection = this._frecency.queries[subQuery].find((selection) => {
+        return selection.id === resultId;
+      });
+
+      if (selection) {
+        // Reduce the score because this is not an exact query match.
+        const frecencyScore =
+          this._subQueryMatchWeight * this._calculateScore(selection.selectedAt, selection.timesSelected, now);
+        if (frecencyScore > 0) return frecencyScore;
+      }
+    }
+
+    // Try calculating frecency score by ID.
+    const selection = this._frecency.selections[resultId];
+    if (selection) {
+      // Reduce the score because this is not an exact query match.
+      return (
+        this._recentSelectionsMatchWeight * this._calculateScore(selection.selectedAt, selection.timesSelected, now)
+      );
+    }
+    return 0;
+  }
+
+  /**
    * Sorts a list of search results based on the saved frecency data.
    * @param {Object} params
    *   @prop {String} searchQuery - The search query the user entered.
@@ -246,17 +315,18 @@ class Frecency {
    */
   sort({ searchQuery, results, keepScores = false }: SortParams): Object[] {
     if (!this._localStorageEnabled) return results;
-    this._calculateFrecencyScores(results, searchQuery);
+
+    const now = Date.now();
+    results.forEach((item) => {
+      item._frecencyScore = this.computeScore({ searchQuery, item, now });
+    });
 
     // For recent selections, sort by frecency. Otherwise, fall back to
     // server-side sorting.
     const recentSelections = results.filter((result) => result._frecencyScore > 0);
     const otherSelections = results.filter((result) => result._frecencyScore === 0);
 
-    const sortedResults = [
-      ...recentSelections.sort((a, b) => b._frecencyScore - a._frecencyScore),
-      ...otherSelections
-    ];
+    const sortedResults = [...recentSelections.sort((a, b) => b._frecencyScore - a._frecencyScore), ...otherSelections];
 
     if (keepScores) return sortedResults;
 
@@ -277,65 +347,6 @@ class Frecency {
     } else {
       return result[this._idAttribute];
     }
-  }
-
-  /**
-   * Calculates frecency scores for each search results and saves the score
-   * on the result object.
-   * @param {Object[]} results - List of search results to calculate scores for.
-   * @param {String} searchQuery - Search query the user entered.
-   */
-  _calculateFrecencyScores(results: Object[], searchQuery: ?string): void {
-    const now = Date.now();
-
-    results.forEach((result) => {
-      const resultId = this._getId(result);
-
-      // Try calculating frecency score by exact query match.
-      const frecencyForQuery = searchQuery && this._frecency.queries[searchQuery];
-
-      if (frecencyForQuery) {
-        const selection = frecencyForQuery.find((selection) => {
-          return selection.id === resultId;
-        });
-
-        if (selection) {
-          result._frecencyScore = this._exactQueryMatchWeight * this._calculateScore(selection.selectedAt,
-            selection.timesSelected, now);
-          if (result._frecencyScore > 0) return;
-        }
-      }
-
-      // Try calculating frecency score by sub-query match.
-      const subQueries = Object.keys(this._frecency.queries).filter((query) => {
-        return isSubQuery(searchQuery, query);
-      });
-
-      // Use for-loop to allow early-return.
-      for (const subQuery of subQueries) {
-        const selection = this._frecency.queries[subQuery].find((selection) => {
-          return selection.id === resultId;
-        });
-
-        if (selection) {
-          // Reduce the score because this is not an exact query match.
-          result._frecencyScore = this._subQueryMatchWeight * this._calculateScore(selection.selectedAt,
-            selection.timesSelected, now);
-          if (result._frecencyScore > 0) return;
-        }
-      }
-
-      // Try calculating frecency score by ID.
-      const selection = this._frecency.selections[resultId];
-      if (selection) {
-        // Reduce the score because this is not an exact query match.
-        result._frecencyScore = this._recentSelectionsMatchWeight * this._calculateScore(selection.selectedAt,
-          selection.timesSelected, now);
-        return;
-      }
-
-      result._frecencyScore = 0;
-    });
   }
 
   /**

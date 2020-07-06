@@ -11,8 +11,8 @@ export type FrecencyData = {
 
       // The list of timestamps of the most recent selections, which will
       // be used to calculate relevance scores for each result.
-      selectedAt: number[]
-    }>;
+      selectedAt: number[],
+    }>,
   },
 
   // Stores information about how often a particular result has been chosen
@@ -23,7 +23,6 @@ export type FrecencyData = {
   //    to rank higher because "brad vogel" has been selected very often.
   selections: {
     [id: string]: {
-
       // Total times this result was chosen regardless of the user's search query.
       timesSelected: number,
 
@@ -33,24 +32,25 @@ export type FrecencyData = {
 
       // The set of queries where the user selected this result. Used when removing results
       // from the frecency data in order to limit the size of the frecency object.
-      queries: { [query: string]: true, }
+      queries: { [query: string]: true },
     },
   },
 
   // Cache of recently selected IDs (ordered from most to least recent). When an ID is
   // selected we'll add or shift the ID to the front. When this list exceeds a certain
   // limit, we'll remove the last ID and remove all frecency data for this ID.
-  recentSelections: string[];
+  recentSelections: string[],
 };
 
-export type StorageProvider = any & $ReadOnly<{
-  getItem: (key: string) => ?string,
-  setItem: (key: string, value: string) => void,
-  removeItem: (key: string) => void,
-  key: (n: number) => ?string,
-  clear: () => void,
-  length: number
-}>
+export type StorageProvider = any &
+  $ReadOnly<{
+    getItem: (key: string) => ?string,
+    setItem: (key: string, value: string) => void,
+    removeItem: (key: string) => void,
+    key: (n: number) => ?string,
+    clear: () => void,
+    length: number,
+  }>;
 
 export type FrecencyOptions = {
   key: string,
@@ -69,8 +69,14 @@ export type SaveParams = {
   dateSelection?: Date,
 };
 
+export type ComputeScoreParams = {
+  searchQuery: ?string,
+  item: Object,
+  now?: number,
+};
+
 export type SortParams = {
   searchQuery: ?string,
   results: Object[],
-  keepScores?: boolean
+  keepScores?: boolean,
 };
