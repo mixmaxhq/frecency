@@ -5,6 +5,13 @@
 
 * **import:** use relative paths to support webpack ([26dfda4](https://github.com/mixmaxhq/frecency/commit/26dfda4b83f2a72e9b9843557b73424e841e6432))
 
+### [1.0.5](https://github.com/mixmaxhq/frecency/compare/v1.0.4...v1.0.5) (2020-08-12)
+
+
+### Bug Fixes
+
+* **import:** use relative paths to support webpack ([4ddaa4c](https://github.com/mixmaxhq/frecency/commit/4ddaa4c65ba1681a68936150e5d00a995331ff95))
+
 ## Release History
 
 * 1.3.1 fallback on other score computation when an entry is too old #11
