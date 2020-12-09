@@ -50,7 +50,7 @@
     "jest": "^24.9.0",
     "rollup": "^0.57.1",
     "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-replace": "^2.2.0",
     "semantic-release": "^17.2.3"
   },
   "config": {
