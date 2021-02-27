@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/mixmaxhq/frecency#readme",
   "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
+    "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^8.3.4",
     "@mixmaxhq/commitlint-jenkins": "^1.4.4",
     "@mixmaxhq/git-hooks": "^1.1.0",
